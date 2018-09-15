@@ -60,7 +60,7 @@ for dirpath, dirnames, filenames in os.walk("."):
         list_df.append([i, tempo, rmse, mfcc, tonal])
 
 df = pd.DataFrame(list_df,columns=['Name','Beat','RMSE','MFCC', 'Tonality'])
-newdf = df[df.columns[1:]]
+new_df = df[df.columns[1:]]
 print(df)
 df.to_csv("features.csv", sep='\t', encoding='utf-8')
 
