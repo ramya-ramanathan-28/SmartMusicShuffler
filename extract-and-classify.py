@@ -60,11 +60,12 @@ for dirpath, dirnames, filenames in os.walk("."):
         list_df.append([i, tempo, rmse, mfcc, tonal])
 
 df = pd.DataFrame(list_df,columns=['Name','Beat','RMSE','MFCC', 'Tonality'])
+newdf = df[df.columns[1:]]
 print(df)
 df.to_csv("features.csv", sep='\t', encoding='utf-8')
 
 #Clustering using HDBSCAN
 import hdbscan
 clusterer = hdbscan.HDBSCAN(algorithm='best', alpha=1.0, approx_min_span_tree=True,gen_min_span_tree=False, leaf_size=40, metric='euclidean', min_cluster_size=5, min_samples=None, p=None)
-clusterer.fit(df)
+clusterer.fit(new_df)
 print(clusterer.labels_)
