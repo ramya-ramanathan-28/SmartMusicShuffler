@@ -16,8 +16,8 @@ for dirpath, dirnames, filenames in os.walk("./songs"):
         i= os.path.join(dirpath, filename)
         print(i)
         
-        #noise removal-high pass, low pass, or both?
-        '''from pydub import AudioSegment
+        #noise removal-high pass, low pass, both or none?
+        from pydub import AudioSegment
         sound = AudioSegment.from_mp3(i)
         sound.export("file.wav", format="wav")
         (Frequency, array) = read('file.wav')
@@ -30,7 +30,7 @@ for dirpath, dirnames, filenames in os.walk("./songs"):
         subprocess.call(['ffmpeg','-y', '-i', 'file2.wav','FilteredMusicfile.mp3'])
         sound = AudioSegment.from_wav("file2.wav")
         sound.export("FilteredMusicfile.mp3", format="mp3")
-        y, sr = librosa.load("FilteredMusicfile.mp3")'''
+        y, sr = librosa.load("FilteredMusicfile.mp3")
         
         
         #Loading music file
