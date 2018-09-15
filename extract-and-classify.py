@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #MUSIC FEATURE EXTRACTION USING LIBROSA LIBRARY
 import librosa
 import librosa.display
@@ -6,19 +5,39 @@ import numpy as np
 import os
 import os.path
 import pandas as pd
+from scipy.io.wavfile import read
+from scipy.io.wavfile import write
+from scipy import signal
 
-#df = pd.DataFrame(columns=['Name','Beat','RMSE','MFCC', 'Tonality'])
 list_df=[]
-for dirpath, dirnames, filenames in os.walk("."):
+for dirpath, dirnames, filenames in os.walk("./songs"):
     for filename in [f for f in filenames if f.endswith(".mp3")]:
         
         i= os.path.join(dirpath, filename)
+        print(i)
+        
+        #noise removal
+        from pydub import AudioSegment
+        sound = AudioSegment.from_mp3(i)
+        sound.export("file.wav", format="wav")
+        (Frequency, array) = read('file.wav')
+        b,a = signal.butter(5, 1000/(Frequency/2), btype='highpass')
+        filteredSignal = signal.lfilter(b,a,array)
+        c,d = signal.butter(5, 380/(Frequency/2), btype='lowpass') 
+        newFilteredSignal = signal.lfilter(c,d,filteredSignal)
+        write("file2.wav", Frequency, newFilteredSignal)
+        import subprocess
+        subprocess.call(['ffmpeg','-y', '-i', 'file2.wav','FilteredMusicfile.mp3'])
+        '''sound = AudioSegment.from_wav("file2.wav")
+        sound.export("FilteredMusicfile.mp3", format="mp3")'''
+        
+
         #Loading music file
         #y = audio time series, sr = sampling rate of y
-        print(i)
-        y, sr = librosa.load(i)
+       
+        y, sr = librosa.load("FilteredMusicfile.mp3")
 
-
+           
         #Extracting Tempo
         tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
         print('Estimated tempo: {:.2f} beats per minute'.format(tempo))
@@ -60,6 +79,8 @@ for dirpath, dirnames, filenames in os.walk("."):
         print('Estimated tonality: {:.2f} '.format(tonal))
         list_df.append([i, tempo, rmse, mfcc, tonal])
 
+
+#Making dataset by using pandas
 df = pd.DataFrame(list_df,columns=['Name','Beat','RMSE','MFCC', 'Tonality'])
 new_df = df[df.columns[1:]]
 print(df)
@@ -70,215 +91,3 @@ import hdbscan
 clusterer = hdbscan.HDBSCAN(algorithm='best', alpha=1.0, approx_min_span_tree=True,gen_min_span_tree=False, leaf_size=40, metric='euclidean', min_cluster_size=5, min_samples=None, p=None)
 clusterer.fit(new_df)
 print(clusterer.labels_)
-=======
-<<<<<<< HEAD
-#MUSIC FEATURE EXTRACTION USING LIBROSA LIBRARY
-import librosa
-import librosa.display
-import numpy as np
-import os
-import os.path
-import pandas as pd
-
-df = pd.DataFrame(columns=['Name','Beat','RMSE','MFCC', 'Tonality'])
-for dirpath, dirnames, filenames in os.walk("."):
-    for filename in [f for f in filenames if f.endswith(".mp3")]:
-        i= os.path.join(dirpath, filename)
-        #Loading music file
-        #y = audio time series, sr = sampling rate of y
-        print(i)
-        y, sr = librosa.load(i)
-
-
-        #Extracting Tempo
-        tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
-        print('Estimated tempo: {:.2f} beats per minute'.format(tempo))
-
-        #Calculation of average rmse 
-        rmses=librosa.feature.rmse(y=y)
-        #print(rmse)
-        rmse=0
-        n=0
-        for item in rmses:
-            for x in item:
-                rmse+=x
-                n=n+1
-        rmse=rmse/n
-        print('Estimated rmse: {:.2f} '.format(rmse))
-
-        #Calculating average mfcc
-        librosa.feature.mfcc(y=y, sr=sr)
-        mfccs = librosa.feature.mfcc(y=y, sr=sr)
-        mfcc=0
-        n=0
-        for item in mfccs:
-            for x in item:
-                mfcc+=x
-                n=n+1
-        mfcc=mfcc/n
-        print('Estimated mfcc: {:.2f} '.format(mfcc))
-
-        #computing tonal centroid features
-        y = librosa.effects.harmonic(y)
-        tonnetz = librosa.feature.tonnetz(y=y, sr=sr)
-        tonal=0
-        n=0
-        for item in tonnetz:
-            for x in item:
-                tonal+=x
-                n=n+1
-        tonal=tonal/n
-        print('Estimated tonality: {:.2f} '.format(tonal))
-        df.append([i, tempo, rmse, mfcc, tonal])
-
-#df = pd.DataFrame(columns=['Beat','RMSE','MFCC', 'Tonality'])
-print(df)
-#Clustering using HDBSCAN
-import hdbscan
-clusterer = hdbscan.HDBSCAN(algorithm='best', alpha=1.0, approx_min_span_tree=True,
-    gen_min_span_tree=False, leaf_size=40, memory=Memory(cachedir=None),
-    metric='euclidean', min_cluster_size=5, min_samples=None, p=None)
-clusterer.fit(df)
-print(clusterer.labels_)
-=======
-<<<<<<< HEAD
-#MUSIC FEATURE EXTRACTION USING LIBROSA LIBRARY
-import librosa
-import librosa.display
-import numpy as np
-import os
-import os.path
-import pandas as pd
-
-df = pd.DataFrame(columns=['Name','Beat','RMSE','MFCC', 'Tonality'])
-for dirpath, dirnames, filenames in os.walk("."):
-    for filename in [f for f in filenames if f.endswith(".mp3")]:
-        i= os.path.join(dirpath, filename)
-        #Loading music file
-        #y = audio time series, sr = sampling rate of y
-        print(i)
-        y, sr = librosa.load(i)
-
-
-        #Extracting Tempo
-        tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
-        print('Estimated tempo: {:.2f} beats per minute'.format(tempo))
-
-        #Calculation of average rmse 
-        rmses=librosa.feature.rmse(y=y)
-        #print(rmse)
-        rmse=0
-        n=0
-        for item in rmses:
-            for x in item:
-                rmse+=x
-                n=n+1
-        rmse=rmse/n
-        print('Estimated rmse: {:.2f} '.format(rmse))
-
-        #Calculating average mfcc
-        librosa.feature.mfcc(y=y, sr=sr)
-        mfccs = librosa.feature.mfcc(y=y, sr=sr)
-        mfcc=0
-        n=0
-        for item in mfccs:
-            for x in item:
-                mfcc+=x
-                n=n+1
-        mfcc=mfcc/n
-        print('Estimated mfcc: {:.2f} '.format(mfcc))
-
-        #computing tonal centroid features
-        y = librosa.effects.harmonic(y)
-        tonnetz = librosa.feature.tonnetz(y=y, sr=sr)
-        tonal=0
-        n=0
-        for item in tonnetz:
-            for x in item:
-                tonal+=x
-                n=n+1
-        tonal=tonal/n
-        print('Estimated tonality: {:.2f} '.format(tonal))
-        df.append([i, tempo, rmse, mfcc, tonal])
-
-#df = pd.DataFrame(columns=['Beat','RMSE','MFCC', 'Tonality'])
-print(df)
-#Clustering using HDBSCAN
-import hdbscan
-clusterer = hdbscan.HDBSCAN(algorithm='best', alpha=1.0, approx_min_span_tree=True,
-    gen_min_span_tree=False, leaf_size=40, memory=Memory(cachedir=None),
-    metric='euclidean', min_cluster_size=5, min_samples=None, p=None)
-clusterer.fit(df)
-print(clusterer.labels_)
-=======
-#MUSIC FEATURE EXTRACTION USING LIBROSA LIBRARY
-import librosa
-import librosa.display
-import numpy as np
-import os
-import os.path
-import pandas as pd
-
-df = pd.DataFrame(columns=['Name','Beat','RMSE','MFCC', 'Tonality'])
-for dirpath, dirnames, filenames in os.walk("."):
-    for filename in [f for f in filenames if f.endswith(".mp3")]:
-        i= os.path.join(dirpath, filename)
-        #Loading music file
-        #y = audio time series, sr = sampling rate of y
-        print(i)
-        y, sr = librosa.load(i)
-
-
-        #Extracting Tempo
-        tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
-        print('Estimated tempo: {:.2f} beats per minute'.format(tempo))
-
-        #Calculation of average rmse 
-        rmses=librosa.feature.rmse(y=y)
-        #print(rmse)
-        rmse=0
-        n=0
-        for item in rmses:
-            for x in item:
-                rmse+=x
-                n=n+1
-        rmse=rmse/n
-        print('Estimated rmse: {:.2f} '.format(rmse))
-
-        #Calculating average mfcc
-        librosa.feature.mfcc(y=y, sr=sr)
-        mfccs = librosa.feature.mfcc(y=y, sr=sr)
-        mfcc=0
-        n=0
-        for item in mfccs:
-            for x in item:
-                mfcc+=x
-                n=n+1
-        mfcc=mfcc/n
-        print('Estimated mfcc: {:.2f} '.format(mfcc))
-
-        #computing tonal centroid features
-        y = librosa.effects.harmonic(y)
-        tonnetz = librosa.feature.tonnetz(y=y, sr=sr)
-        tonal=0
-        n=0
-        for item in tonnetz:
-            for x in item:
-                tonal+=x
-                n=n+1
-        tonal=tonal/n
-        print('Estimated tonality: {:.2f} '.format(tonal))
-        df.append([i, tempo, rmse, mfcc, tonal])
-
-#df = pd.DataFrame(columns=['Beat','RMSE','MFCC', 'Tonality'])
-print(df)
-#Clustering using HDBSCAN
-import hdbscan
-clusterer = hdbscan.HDBSCAN(algorithm='best', alpha=1.0, approx_min_span_tree=True,
-    gen_min_span_tree=False, leaf_size=40, memory=Memory(cachedir=None),
-    metric='euclidean', min_cluster_size=5, min_samples=None, p=None)
-clusterer.fit(df)
-print(clusterer.labels_)
->>>>>>> 66830d20935977d0b45e1fc43cd6dfcb4f8f4935
->>>>>>> 24c6d02e5b5ddecb6b4a8d8d0f30cae6f1a4e951
->>>>>>> 1586eb0bbd9fdc984a3b01aed3eb3e34c674cccf
