@@ -10,7 +10,11 @@ from tkinter import filedialog
 from tkinter import ttk
 from ttkthemes import themed_tk as tk
 
+import mutagen
 from mutagen.mp3 import MP3
+from mutagen.easyid3 import EasyID3
+
+
 from pygame import mixer
 
 root = tk.ThemedTk()
@@ -106,14 +110,21 @@ rightframe.pack(pady=30)
 topframe = Frame(rightframe)
 topframe.pack()
 
-lengthlabel = ttk.Label(topframe, text='Total Length : --:--')
-lengthlabel.pack(pady=5)
+bottomframe = Frame(rightframe)
+bottomframe.pack()
 
-currenttimelabel = ttk.Label(topframe, text='Current Time : --:--', relief=GROOVE)
+titlelabel = ttk.Label(topframe, text = '')
+titlelabel.pack(pady = 5)
+
+artistlabel = ttk.Label(topframe, text = '')
+artistlabel.pack(pady = 5)
+
+currenttimelabel = ttk.Label(topframe, text='--:-- / --:--', relief=GROOVE)
 currenttimelabel.pack()
 
 
 song_run_time = 0
+COMPLETED = False
 
 def show_details(play_song):
     file_data = os.path.splitext(play_song)
@@ -125,12 +136,18 @@ def show_details(play_song):
         a = mixer.Sound(play_song)
         total_length = a.get_length()
 
+    audio = EasyID3(play_song)
+    title = audio['title'][0]
+    artist = audio['artist'][0]
+    album = audio['album'][0]
+    print (title, artist, album)
+
     # div - total_length/60, mod - total_length % 60
     mins, secs = divmod(total_length, 60)
     mins = round(mins)
     secs = round(secs)
-    timeformat = '{:02d}:{:02d}'.format(mins, secs)
-    lengthlabel['text'] = "Total Length" + ' - ' + timeformat
+    titlelabel['text'] = title
+    artistlabel['text'] = artist + ' - ' + album
 
     t1 = threading.Thread(target=start_count, args=(total_length,))
     t1.start()
@@ -141,6 +158,11 @@ def start_count(t):
     # mixer.music.get_busy(): - Returns FALSE when we press the stop button (music stop playing)
     # Continue - Ignores all of the statements below it. We check if music is paused or not.
     current_time = 0
+    mins, secs = divmod(t, 60)
+    mins = round(mins)
+    secs = round(secs)
+    timeformattotal = '{:02d}:{:02d}'.format(mins, secs)
+    print ('total time : ', t)
     while current_time <= t and mixer.music.get_busy():
         if paused:
             continue
@@ -149,38 +171,54 @@ def start_count(t):
             mins = round(mins)
             secs = round(secs)
             timeformat = '{:02d}:{:02d}'.format(mins, secs)
-            currenttimelabel['text'] = "Current Time" + ' - ' + timeformat
+            currenttimelabel['text'] = timeformat + ' / ' + timeformattotal
             time.sleep(1)
             current_time += 1
             if current_time<=25:
                 global song_run_time
                 song_run_time = current_time
 
+    print ('current time : ', current_time)
+   
+    if current_time>=int(t):
+            global COMPLETED
+            COMPLETED = True
+            print ('completed')
 
 
 def play_music():
     global paused
-
     if paused:
         mixer.music.unpause()
         statusbar['text'] = "Music Resumed"
         paused = FALSE
     else:
-        try:
-            stop_music()
-            time.sleep(1)
-            selected_song = playlistbox.curselection()
-            selected_song = int(selected_song[0])
-            play_it = playlist[selected_song]
-            print ()
-            mixer.music.load(play_it)
-            mixer.music.play()
-            statusbar['text'] = "Playing music" + ' - ' + os.path.basename(play_it)
-            show_details(play_it)
-            
+#        try:
+                stop_music()
+                time.sleep(1)
+                global COMPLETED
+                if COMPLETED == False:
+                    print ('box')
+                    selected_song = playlistbox.curselection()
+                    selected_song = int(selected_song[0])
+                COMPLETED = False
+                play_it = playlist[selected_song]
+                print ()
+                mixer.music.load(play_it)
+                mixer.music.play()
+                statusbar['text'] = "Playing music" + ' - ' + os.path.basename(play_it)
+                print ('showing details')
+                show_details(play_it)
+                if COMPLETED == True:
+                    '''
+                    selected_song = get_next_song(selected_song)    #function needs to write next song to DB or whatever
+                    '''
+                    selected_song = selected_song + 1
+                    print ('song completed')
+'''
         except:
             tkinter.messagebox.showerror('File not found', 'Melody could not find the file. Please check again.')
-
+'''
 
 def stop_music():
     mixer.music.stop()
