@@ -3,8 +3,12 @@ import glob
 import threading
 import queue
 import time
+import stagger
 import pandas as pd
 from random import randint
+import PIL.Image
+import PIL.ImageTk
+import PIL.ImageDraw
 import tkinter.messagebox
 from tkinter import *
 from tkinter import filedialog
@@ -13,6 +17,7 @@ from tkinter import ttk
 from ttkthemes import themed_tk as tk
 
 import mutagen
+from mutagen import File
 from mutagen.mp3 import MP3
 from mutagen.easyid3 import EasyID3
 
@@ -65,7 +70,7 @@ def browse_file():
         songs_list.loc[index] = [index, x]
         index +=1
 
-    print ('PLAYLIST DONE')
+    print ('PLAYLIST DONE')    
     print (x)
     mixer.music.queue(x)
     songs_list.to_csv('song_data.csv', index = False)
@@ -98,28 +103,45 @@ root.title("Melody")
 leftframe = Frame(root)
 leftframe.pack(side=LEFT, padx=30, pady=30)
 
-playlistbox = Listbox(leftframe)
-playlistbox.pack()
+topframe = Frame(leftframe)
+topframe.pack()
 
-addBtn = ttk.Button(leftframe, text="+ Add", command=browse_file)
+bottomframe = Frame(leftframe)
+bottomframe.pack()
+
+playlistbox = Listbox(topframe)
+playlistbox.pack(side = 'left', fill = 'y')
+
+scrollbar = Scrollbar(topframe, orient=VERTICAL)
+scrollbar.config(command=playlistbox.yview)
+scrollbar.pack(side="right", fill="y")
+
+addBtn = ttk.Button(bottomframe, text="+ Add", command=browse_file)
 addBtn.pack(side=LEFT)
+
+playlistbox.config(yscrollcommand=scrollbar.set)
+
 
 rightframe = Frame(root)
 rightframe.pack(pady=30)
 
-topframe = Frame(rightframe)
+
+topframe = Frame(rightframe, width = 150, height = 150)
 topframe.pack()
+
+imagelabel = ttk.Label(topframe)
+imagelabel.pack()
 
 bottomframe = Frame(rightframe)
 bottomframe.pack()
 
-titlelabel = ttk.Label(topframe, text = '')
+titlelabel = ttk.Label(bottomframe, text = '')
 titlelabel.pack(pady = 5)
 
-artistlabel = ttk.Label(topframe, text = '')
+artistlabel = ttk.Label(bottomframe, text = '')
 artistlabel.pack(pady = 5)
 
-currenttimelabel = ttk.Label(topframe, text=' --:--', relief=GROOVE)
+currenttimelabel = ttk.Label(bottomframe, text=' --:--', relief=GROOVE)
 currenttimelabel.pack()
 
 
@@ -145,10 +167,42 @@ def show_details(play_song):
         total_length = a.get_length()
 
     audio = EasyID3(play_song)
-    title = audio['title'][0]
-    artist = audio['artist'][0]
-    album = audio['album'][0]
+
+    if 'title' not in audio:
+        title = file_data = os.path.basename(play_song)
+    else:
+        title = audio['title'][0].rstrip()
+    if 'artist' not in audio:
+        artist = 'Unknown'
+    else:
+        artist = audio['artist'][0].rstrip()
+    if 'album'not in audio:
+        album = 'Unknown'
+    else:
+        album = audio['album'][0].rstrip()
+
+    '''
+    mp3 = stagger.read_tag(play_song)
+    print (mp3[stagger.id3.APIC])
+    artwork = mp3[stagger.id3.APIC][0].data
+    '''
     
+    file = File(play_song)
+    if 'APIC:' in file.tags.keys():
+        artwork = file.tags['APIC:'].data
+        with open('albumart.jpg', 'wb') as img:
+           img.write(artwork) # write artwork to new image
+    else :
+        img = PIL.Image.new('RGB', (150, 150), (255, 255, 255))
+        draw = PIL.ImageDraw.Draw(img)
+        img.save('albumart.jpg', 'JPEG', transparency=0)
+
+    image1 = PIL.Image.open('albumart.jpg')
+    image1 = image1.resize((150, 150),PIL.Image.ANTIALIAS)
+    imagelabel.img = PIL.ImageTk.PhotoImage(image1)
+    imagelabel['image'] = imagelabel.img
+    
+
     titlelabel['text'] = title
     artistlabel['text'] = artist + ' - ' + album
 
@@ -174,8 +228,10 @@ def start_count(t):
     mins = round(mins)
     secs = round(secs)
     totaltimeformat = '{:02d}:{:02d}'.format(mins, secs)
-    print ('total time : ', t)
+    #print ('total time : ', t)
+    print ()
     print (mixer.music.get_busy())
+    print ()
     while current_time <= t and mixer.music.get_busy():
         if paused:
             continue
@@ -197,8 +253,6 @@ def start_count(t):
     timeformat = '{:02d}:{:02d}'.format(mins, secs)
     currenttimelabel['text'] = timeformat + ' / ' + totaltimeformat
     
-    print (current_time)
-    print (song_run_time)
 
 
 def play_music():
@@ -214,11 +268,6 @@ def play_music():
     else:
         
             try:
-                '''
-                SONG_END = pygame.USEREVENT + 1
-
-                pygame.mixer.music.set_endevent(SONG_END)
-                '''
                 stop_music()
                 time.sleep(1)
                 global skipped
@@ -230,23 +279,22 @@ def play_music():
                 print ('selected song : ', selected_song)
                 playlistbox.selection_clear(0, END)
                 playlistbox.selection_set(selected_song)
+                playlistbox.see(selected_song)
                 play_it = playlist[selected_song]
                 mixer.music.load(play_it)
                 
                 mixer.music.play()
-                print ('pos', mixer.music.get_pos())
+                while(not mixer.music.get_busy()):
+                    print (mixer.music.get_busy())
+                    mixer.music.play()
+
                 statusbar['text'] = "Playing music" + ' - ' + os.path.basename(play_it)
-                '''
-                while True:
-                    for event in pygame.event.get():        
-                        if event.type == SONG_END:
-                            print("the song ended!")
-                            break
-                '''
+
                 show_details(play_it)
 
-                print ('completed')
-            except:
+                #print ('completed')
+            except Exception as e:
+                print (e)
                 tkinter.messagebox.showerror('File not found', 'Melody could not find the file. Please check again.')
 
 
@@ -281,7 +329,7 @@ def skip_music():
     skipped = True
     global selected_song
     print ('1 : ', selected_song)
-    selected_song = randint(0, len(playlist))
+    selected_song = randint(0, len(playlist)-1)
     print ('2 : ', selected_song)
     statusbar['text'] = "Music skipped"
     play_music()
@@ -329,11 +377,11 @@ playBtn.grid(row=0, column=0, padx=10)
 
 stopPhoto = PhotoImage(file='images/stop.png')
 stopBtn = ttk.Button(middleframe, image=stopPhoto, command=stop_music)
-stopBtn.grid(row=0, column=1, padx=10)
+stopBtn.grid(row=0, column=2, padx=10)
 
 pausePhoto = PhotoImage(file='images/pause.png')
 pauseBtn = ttk.Button(middleframe, image=pausePhoto, command=pause_music)
-pauseBtn.grid(row=0, column=2, padx=10)
+pauseBtn.grid(row=0, column=1, padx=10)
 
 # Bottom Frame for volume, rewind, mute etc.
 
