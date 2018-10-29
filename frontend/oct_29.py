@@ -21,11 +21,6 @@ from pygame import mixer
 
 root = tk.ThemedTk()
 root.get_themes()                 # Returns a list of all themes that can be set
-
-'''
-['classic', 'ubuntu', 'keramik_alt', 'elegance', 'equilux', 'black', 'default', 'arc', 'smog', 'radiance', 'itft1', 'plastik', 'aquativo', 'keramik', 'clam', 'winxpblue', 'clearlooks', 'kroc', 'blue', 'alt']
-'''
-
 root.set_theme("plastik")         # Sets an available theme
 
 # Fonts - Arial (corresponds to Helvetica), Courier New (Courier), Comic Sans MS, Fixedsys,
@@ -33,7 +28,7 @@ root.set_theme("plastik")         # Sets an available theme
 #
 # Styles - normal, bold, roman, italic, underline, and overstrike.
 
-statusbar = ttk.Label(root, text="Welcome to Melody", relief=SUNKEN, anchor=W, font='Times 10 italic')
+statusbar = ttk.Label(root, text="Welcome to Melody", relief=SUNKEN, anchor=W, font='Times 12')
 statusbar.pack(side=BOTTOM, fill=X)
 
 # Create the menubar
@@ -52,6 +47,9 @@ playlist = []
 # Fullpath + filename is required to play the music inside play_music load function
 
 def browse_file():
+    """
+    Finds all files in the directory chosen by the user
+    """
     global filename_path
     filename_path = filedialog.askdirectory()
     x = ''
@@ -73,6 +71,15 @@ def browse_file():
     songs_list.to_csv('song_data.csv', index = False)
 
 def add_to_playlist(filename_path, index):
+    """
+    Adds a file to the playlist
+
+    Args:
+
+    filename_path : path to the music file to be added to the playlist
+    index : index of the entry in the playlist
+    """
+    
     print ()
     filename = os.path.basename(filename_path)
     playlistbox.insert(index, filename)
@@ -121,6 +128,13 @@ selected_song = 0
 skipped = False
 
 def show_details(play_song):
+    """
+    Displays the details of the currently playing song on the screen
+
+    Args:
+    play_song : the music file currently being played
+    
+    """
     file_data = os.path.splitext(play_song)
 
     if file_data[1] == '.mp3':
@@ -144,6 +158,13 @@ def show_details(play_song):
     
 
 def start_count(t):
+    """
+    Time counter for display of current time on the screen
+
+    Args:
+    t : total length of the song in seconds
+    
+    """
     global paused
     # mixer.music.get_busy(): - Returns FALSE when we press the stop button (music stop playing)
     # Continue - Ignores all of the statements below it. We check if music is paused or not.
@@ -181,6 +202,9 @@ def start_count(t):
 
 
 def play_music():
+    """
+    Plays the music
+    """
     global paused
 
     if paused:
@@ -227,6 +251,9 @@ def play_music():
 
 
 def stop_music():
+    """
+    Stops music play
+    """
     mixer.music.stop()
     statusbar['text'] = "Music Stopped"
 
@@ -235,6 +262,9 @@ paused = FALSE
 
 
 def pause_music():
+    """
+    Pauses the currently playing song
+    """
     global paused
     paused = TRUE
     mixer.music.pause()
@@ -242,6 +272,9 @@ def pause_music():
 
 
 def skip_music():
+    """
+    Goes to the next song queued
+    """
     mixer.music.stop()
     print ('skipped')
     global skipped
@@ -255,6 +288,13 @@ def skip_music():
 
 
 def set_vol(val):
+    """
+    Sets the volume of music play
+
+    Args:
+
+    val : value of volume to be set
+    """
     volume = float(val) / 100
     mixer.music.set_volume(volume)
     # set_volume of mixer takes value only from 0 to 1. Example - 0, 0.1,0.55,0.54.0.99,1
@@ -264,6 +304,9 @@ muted = FALSE
 
 
 def mute_music():
+    """
+    Mutes the song if it is unmuted, and unmutes it if it is muted
+    """
     global muted
     if muted:  # Unmute the music
         mixer.music.set_volume(0.7)
@@ -313,6 +356,9 @@ scale.grid(row=0, column=2, pady=15, padx=30)
 
 
 def on_closing():
+    """
+    Closes the player
+    """
     stop_music()
     root.destroy()
 
