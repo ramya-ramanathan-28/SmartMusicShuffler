@@ -1,0 +1,15 @@
+ID,Name,Beat,RMSE,MFCC,Tonality,cluster_labels
+0,/home/radhakumaran/Documents/Projects/minorProject/code/my_code/oct_29/Python-Music-Player/Music/All Time Low - Sick Little Games.mp3,95.703125,0.25395650891136395,5.034477126500146,0.002612119675675368,0
+1,/home/radhakumaran/Documents/Projects/minorProject/code/my_code/oct_29/Python-Music-Player/Music/BackStreet Boys - Shape of My Heart.mp3,99.38401442307692,0.09095745487163273,-1.4298875003325435,0.008735228085503947,1
+2,/home/radhakumaran/Documents/Projects/minorProject/code/my_code/oct_29/Python-Music-Player/Music/break_your_little_heart.mp3,151.9990808823529,0.3235275797876599,7.106909924933088,-0.011412966242917393,6
+3,/home/radhakumaran/Documents/Projects/minorProject/code/my_code/oct_29/Python-Music-Player/Music/Lemonade Mouth - Determinate (Music Video) - Full Length.mp3,143.5546875,0.07900479319771153,-0.6555244369421939,-0.008687307440066011,2
+4,/home/radhakumaran/Documents/Projects/minorProject/code/my_code/oct_29/Python-Music-Player/Music/03 Runner_s High.mp3,143.5546875,0.2684584857786403,7.846955817768292,0.028780145924732107,3
+5,/home/radhakumaran/Documents/Projects/minorProject/code/my_code/oct_29/Python-Music-Player/Music/1-11 Roses.mp3,143.5546875,0.3254704855502876,6.354214108760113,-0.0074369176938961345,3
+6,/home/radhakumaran/Documents/Projects/minorProject/code/my_code/oct_29/Python-Music-Player/Music/_ Bea Miller - Open Your Eyes (Deep Blue Songspell) (Audio Only).mp3,143.5546875,0.10926619223209406,-2.248464381682622,0.00953151223949372,2
+7,/home/radhakumaran/Documents/Projects/minorProject/code/my_code/oct_29/Python-Music-Player/Music/Somebody lyrics.mp3,83.35433467741936,0.19888460923188,4.366142518040778,-0.01706961852966694,4
+8,/home/radhakumaran/Documents/Projects/minorProject/code/my_code/oct_29/Python-Music-Player/Music/01-boys_like_girls-the_great_escape.mp3,151.9990808823529,0.25213224539984364,4.511455511317494,0.012836124748506041,6
+9,/home/radhakumaran/Documents/Projects/minorProject/code/my_code/oct_29/Python-Music-Player/Music/avril_lavigne-innocence.mp3,135.99917763157896,0.2515734625675123,2.97597078998806,0.003821577370678079,5
+10,/home/radhakumaran/Documents/Projects/minorProject/code/my_code/oct_29/Python-Music-Player/Music/5 Seconds of Summer - Story of Another Us (Original Audio)_(new).mp3,151.9990808823529,0.22897964705192106,6.150677690220598,-0.00925392128977497,6
+11,/home/radhakumaran/Documents/Projects/minorProject/code/my_code/oct_29/Python-Music-Player/Music/1-03 Chasing Ghosts.mp3,103.359375,0.27148144627993565,3.4423907770729367,-0.028629501281528764,1
+12,/home/radhakumaran/Documents/Projects/minorProject/code/my_code/oct_29/Python-Music-Player/Music/All Time Low - Somewhere In Neverland (Acoustic).mp3,123.046875,0.1855261709980647,-2.9943150830085083,-0.02056378863210715,7
+13,/home/radhakumaran/Documents/Projects/minorProject/code/my_code/oct_29/Python-Music-Player/Music/Therapy.mp3,172.265625,0.2446943864601383,1.7350571628425822,-0.015103618391040125,8
