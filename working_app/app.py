@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings("ignore")
+
 import os
 import glob
 import threading
@@ -9,7 +12,6 @@ from random import randint
 import PIL.Image
 import PIL.ImageTk
 import PIL.ImageDraw
-#from integrated import song_run_time
 import tkinter.messagebox
 from tkinter import *
 from tkinter import filedialog
@@ -25,6 +27,9 @@ from mutagen.easyid3 import EasyID3
 
 from pygame import mixer
 
+from extract_and_classify import cluster
+from integrated2 import predict
+
 root = tk.ThemedTk()
 root.get_themes()                 # Returns a list of all themes that can be set
 root.set_theme("plastik")         # Sets an available theme
@@ -34,7 +39,7 @@ root.set_theme("plastik")         # Sets an available theme
 #
 # Styles - normal, bold, roman, italic, underline, and overstrike.
 
-statusbar = ttk.Label(root, text="Welcome to Melody", relief=SUNKEN, anchor=W, font='Times 12')
+statusbar = ttk.Label(root, text="Shuffle", relief=SUNKEN, anchor=W, font='Times 12')
 statusbar.pack(side=BOTTOM, fill=X)
 
 # Create the menubar
@@ -59,9 +64,13 @@ def browse_file():
     global filename_path
     filename_path = filedialog.askdirectory()
     x = ''
-    index = 0
-
-    songs_list = pd.DataFrame(columns = ['ID', 'Path'])
+    
+    if not os.path.exists('data/song_data.csv'):
+        songs_list = pd.DataFrame(columns = ['ID', 'Path'])
+        index = 0
+    else:
+        songs_list = pd.read_csv('data/song_data.csv')
+        index = len(songs_list)
     for x in glob.glob(filename_path + '/*.mp3'):
         add_to_playlist(x, index)
         songs_list.loc[index] = [index, x]
@@ -77,6 +86,7 @@ def browse_file():
     print (x)
     mixer.music.queue(x)
     songs_list.to_csv('data/song_data.csv', index = False)
+    #cluster()
 
 def add_to_playlist(filename_path, index):
     """
@@ -96,7 +106,7 @@ def add_to_playlist(filename_path, index):
 
 mixer.init()  # initializing the mixer
 
-root.title("Melody")
+root.title("Shuffle")
 #root.iconbitmap(r'images/melody.ico')
 
 # Root Window - StatusBar, LeftFrame, RightFrame
@@ -152,7 +162,7 @@ song_run_time = 0
 selected_song = 0
 skipped = False
 CHOSEN = True
-
+queue_flag = -1
 def show_details(play_song):
     """
     Displays the details of the currently playing song on the screen
@@ -281,6 +291,8 @@ def play_music():
                     selected_song = int(select[0])
                     global CHOSEN
                     CHOSEN = True
+                    global queue_flag
+                    queue_flag = -1
                 skipped = False
                 print ('selected song : ', selected_song)
                 playlistbox.selection_clear(0, END)
@@ -334,13 +346,15 @@ def skip_music():
     global skipped
     skipped = True
     global CHOSEN
-    CHOSEN = False
+    global queue_flag
     global selected_song
     print ('1 : ', selected_song)
-    selected_song = randint(0, len(playlist)-1)
-    #global song_run_time
-    #selected_song = get_next_song(selected_song, song_run_time)
+    #selected_song = randint(0, len(playlist)-1)
+    global song_run_time
+    flag = 1 if song_run_time > 25 else 0
+    selected_song, queue_flag = predict(selected_song, flag, queue_flag, CHOSEN)
     print ('2 : ', selected_song)
+    CHOSEN = False
     statusbar['text'] = "Music skipped"
     play_music()
 
