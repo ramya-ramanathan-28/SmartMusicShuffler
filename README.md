@@ -1,4 +1,4 @@
-# SmartMusicShuffler
+# Shuffle - The smart music shuffler.
 
 A work in progress.
 
